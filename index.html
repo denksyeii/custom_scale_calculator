@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- configuracion de pantalla para celulares sin zoom accidental -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#f5dce0">
+  <title>4UH</title>
+  <style>
+    /* variables de diseno configurables */
+    :root {
+      --bg-color: #d8a7b1;
+      --card-bg: rgba(248, 229, 233, 0.92);
+      --accent: #563d28;
+      --accent-hover: #422e1e;
+      --text-main: #2b2118;
+      --text-dim: #5c4e43;
+      --input-bg: rgba(255, 255, 255, 0.55);
+      --border-color: rgba(86, 61, 40, 0.15);
+      --radius: 20px;
+    }
+
+    /* reseteo y fondo general */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--text-main);
+    }
+
+    /* tarjeta principal adaptable a movil y escritorio */
+    .app-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    /* cabecera con avatar y saludo */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s ease;
+    }
+
+    .header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    /* barra de pestanas */
+    .tabs {
+      display: flex;
+      background: rgba(86, 61, 40, 0.2);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 9px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* contenedores de formularios */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    /* boton principal */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* cuadro de resultados */
+    .result-box {
+      margin-top: 16px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(86, 61, 40, 0.18);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .result-box.error {
+      background: rgba(220, 53, 69, 0.15);
+      color: #9b1c28;
+      border: 1px solid rgba(220, 53, 69, 0.35);
+    }
+
+    .result-box.success {
+      background: rgba(46, 125, 50, 0.15);
+      color: #1b5e20;
+      border: 1px solid rgba(46, 125, 50, 0.35);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-card">
+    <!-- cabecera -->
+    <div class="header">
+      <img id="avatar" src="assets/personaje_pensando.png" alt="Avatar">
+      <h2 id="txtSaludo">Cargando...</h2>
+    </div>
+
+    <!-- selector de pestanas -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabBtnEsc" onclick="cambiarPestana('esc')">Escalas</button>
+      <button class="tab-btn" id="tabBtnUni" onclick="cambiarPestana('uni')">Unidades</button>
+    </div>
+
+    <!-- pestana 1: escalas -->
+    <div id="panelEsc" class="tab-content active">
+      <div class="form-group">
+        <label id="lblMedida">Medida a convertir (cm):</label>
+        <input type="text" inputmode="decimal" id="inMedida" placeholder="ej. 15.5">
+      </div>
+      <div class="form-group">
+        <label id="lblEscAnt">Escala actual:</label>
+        <input type="text" inputmode="decimal" id="inEscAnt" placeholder="ej. 1:250 o 250">
+      </div>
+      <div class="form-group">
+        <label id="lblEscNue">Escala destino:</label>
+        <input type="text" inputmode="decimal" id="inEscNue" placeholder="ej. 1:75 o 75">
+      </div>
+      <button class="btn-submit" id="btnCalcEsc" onclick="ejecutarEscalas()">Calcular</button>
+      <div class="result-box" id="resEsc">Ingresa los datos para calcular</div>
+    </div>
+
+    <!-- pestana 2: unidades -->
+    <div id="panelUni" class="tab-content">
+      <div class="form-group">
+        <label id="lblValor">Valor a transformar:</label>
+        <input type="text" inputmode="decimal" id="inValorUni" placeholder="ej. 10.5">
+      </div>
+      <div class="form-group">
+        <label id="lblDesde">Desde:</label>
+        <select id="selOrigen"></select>
+      </div>
+      <div class="form-group">
+        <label id="lblHacia">Hacia:</label>
+        <select id="selDestino"></select>
+      </div>
+      <button class="btn-submit" id="btnCalcUni" onclick="ejecutarUnidades()">Convertir</button>
+      <div class="result-box" id="resUni">Selecciona las unidades</div>
+    </div>
+  </div>
+
+  <script>
+    // selector de version: cambiar entre "personal" y "generico"
+    const PERFIL_ACTIVO = "personal";
+
+    // diccionario de textos e imagenes por perfil
+    const CONFIGURACIONES = {
+      generico: {
+        titulo_ventana: "Conversor de Escalas y Unidades",
+        saludo: "Herramienta de Medición Técnica",
+        tab_escalas: "Escalas de Planos",
+        tab_unidades: "Conversor de Unidades",
+        lbl_medida: "Medida a convertir (cm):",
+        lbl_esc_ant: "Escala actual (ej. 250 o 1:250):",
+        lbl_esc_nue: "Escala destino (ej. 75 o 1:75):",
+        btn_escala: "Calcular Escala",
+        lbl_valor: "Valor a transformar:",
+        lbl_desde: "Desde:",
+        lbl_hacia: "Hacia:",
+        btn_unidad: "Convertir Unidades",
+        err_numeros: "Por favor ingrese valores numericos validos.",
+        err_cero: "Las escalas deben ser mayores a cero.",
+        err_iguales: "Las escalas ingresadas son identicas.",
+        img_inicial: "assets/icono_tecnico.png",
+        img_exito: "assets/icono_tecnico.png",
+        img_espera: "assets/icono_tecnico.png"
+      },
+      personal: {
+        titulo_ventana: "4UH - Especial",
+        saludo: "Calculadora ૮ ˶ᵔ ᵕ ᵔ˶ ა",
+        tab_escalas: "Escalas :p 📐",
+        tab_unidades: "Unidades owo📏",
+        lbl_medida: "Medida a cambiar (cm) :3 :",
+        lbl_esc_ant: "Escala que tienes (ej. 1:250 o 250):",
+        lbl_esc_nue: "Escala a la que pasas (ej. 1:75 o 75):",
+        btn_escala: "Calcular medida ✨",
+        lbl_valor: "Medida a transformar miamor:",
+        lbl_desde: "Desde esta unidad:",
+        lbl_hacia: "A esta otra unidad:",
+        btn_unidad: "Convertir unidades muak ^3^",
+        err_numeros: "Solo numeros miamorcita bella (⸝⸝๑﹏๑⸝⸝)",
+        err_cero: "Las escalas tienen que ser mayores a cero mi vida (๑-__-๑)",
+        err_iguales: "Pusiste las mismas escalas miamor, intentalo de nuevo c:",
+        img_inicial: "assets/personaje_pensando.png",
+        img_exito: "assets/personaje_feliz.png",
+        img_espera: "assets/personaje_pensando.png"
+      }
+    };
+
+    // factores de equivalencia en metros
+    const FACTORES_METRO = {
+      "Milímetros (mm)": 0.001,
+      "Centímetros (cm)": 0.01,
+      "Metros (m)": 1.0,
+      "Kilómetros (km)": 1000.0,
+      "Pulgadas (in)": 0.0254,
+      "Pies (ft)": 0.3048,
+      "Yardas (yd)": 0.9144,
+      "Millas (mi)": 1609.344
+    };
+
+    const txt = CONFIGURACIONES[PERFIL_ACTIVO];
+
+    // inicializar la interfaz apenas cargue el html
+    window.addEventListener('DOMContentLoaded', () => {
+      document.title = txt.titulo_ventana;
+      document.getElementById('txtSaludo').innerText = txt.saludo;
+      document.getElementById('tabBtnEsc').innerText = txt.tab_escalas;
+      document.getElementById('tabBtnUni').innerText = txt.tab_unidades;
+      document.getElementById('lblMedida').innerText = txt.lbl_medida;
+      document.getElementById('lblEscAnt').innerText = txt.lbl_esc_ant;
+      document.getElementById('lblEscNue').innerText = txt.lbl_esc_nue;
+      document.getElementById('btnCalcEsc').innerText = txt.btn_escala;
+      document.getElementById('lblValor').innerText = txt.lbl_valor;
+      document.getElementById('lblDesde').innerText = txt.lbl_desde;
+      document.getElementById('lblHacia').innerText = txt.lbl_hacia;
+      document.getElementById('btnCalcUni').innerText = txt.btn_unidad;
+
+      // asignar imagen inicial
+      document.getElementById('avatar').src = txt.img_inicial;
+
+      // rellenar listas desplegables de unidades
+      const selOri = document.getElementById('selOrigen');
+      const selDes = document.getElementById('selDestino');
+      selOri.innerHTML = '';
+      selDes.innerHTML = '';
+
+      Object.keys(FACTORES_METRO).forEach(u => {
+        selOri.add(new Option(u, u));
+        selDes.add(new Option(u, u));
+      });
+
+      selOri.value = "Metros (m)";
+      selDes.value = "Centímetros (cm)";
+    });
+
+    // funcion para limpiar numeros y aceptar comas o prefijos 1:
+    function limpiarNumero(texto, esEscala = false) {
+      if (!texto) return NaN;
+      let limpio = texto.toString().trim().toLowerCase();
+      if (esEscala) {
+        limpio = limpio.replace("1:", "").replace("1/", "");
+      }
+      limpio = limpio.replace(",", ".");
+      return Number(limpio);
+    }
+
+    // funcion para alternar entre pestanas
+    function cambiarPestana(tipo) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      if (tipo === 'esc') {
+        document.getElementById('tabBtnEsc').classList.add('active');
+        document.getElementById('panelEsc').classList.add('active');
+      } else {
+        document.getElementById('tabBtnUni').classList.add('active');
+        document.getElementById('panelUni').classList.add('active');
+      }
+    }
+
+    // calculo de escalas en javascript puro
+    function ejecutarEscalas() {
+      const mStr = document.getElementById('inMedida').value;
+      const eaStr = document.getElementById('inEscAnt').value;
+      const enStr = document.getElementById('inEscNue').value;
+      const box = document.getElementById('resEsc');
+      const avatar = document.getElementById('avatar');
+
+      const medida = limpiarNumero(mStr, false);
+      const ant = limpiarNumero(eaStr, true);
+      const nue = limpiarNumero(enStr, true);
+
+      if (isNaN(medida) || isNaN(ant) || isNaN(nue) || mStr.trim() === "" || eaStr.trim() === "" || enStr.trim() === "") {
+        box.className = 'result-box error';
+        box.innerText = txt.err_numeros;
+        avatar.src = txt.img_espera;
+        return;
+      }
+
+      if (ant <= 0 || nue <= 0) {
+        box.className = 'result-box error';
+        box.innerText = txt.err_cero;
+        avatar.src = txt.img_espera;
+        return;
+      }
+
+      if (ant === nue) {
+        box.className = 'result-box error';
+        box.innerText = txt.err_iguales;
+        avatar.src = txt.img_espera;
+        return;
+      }
+
+      // redondear a maximo 3 decimales eliminando ceros extra
+      const res = Number((medida * (ant / nue)).toFixed(3));
+      const fAnt = Number.isInteger(ant) ? ant : ant;
+      const fNue = Number.isInteger(nue) ? nue : nue;
+
+      let msg = "";
+      if (PERFIL_ACTIVO === "personal") {
+        msg = `Listo mi amor: ${medida} cm en 1:${fAnt} equivale a ${res} cm en 1:${fNue} ૮ ˶ᵔ ᵕ ᵔ˶ ა`;
+      } else {
+        msg = `${medida} cm en 1:${fAnt} equivale a ${res} cm en 1:${fNue}`;
+      }
+
+      box.className = 'result-box success';
+      box.innerText = msg;
+      avatar.src = txt.img_exito;
+    }
+
+    // conversion de unidades en javascript puro
+    function ejecutarUnidades() {
+      const vStr = document.getElementById('inValorUni').value;
+      const uOrigen = document.getElementById('selOrigen').value;
+      const uDestino = document.getElementById('selDestino').value;
+      const box = document.getElementById('resUni');
+      const avatar = document.getElementById('avatar');
+
+      const valor = limpiarNumero(vStr, false);
+
+      if (isNaN(valor) || vStr.trim() === "") {
+        box.className = 'result-box error';
+        box.innerText = txt.err_numeros;
+        avatar.src = txt.img_espera;
+        return;
+      }
+
+      const enMetros = valor * FACTORES_METRO[uOrigen];
+      const res = Number((enMetros / FACTORES_METRO[uDestino]).toFixed(4));
+
+      const u1 = uOrigen.split(" ")[0];
+      const u2 = uDestino.split(" ")[0];
+
+      let msg = "";
+      if (PERFIL_ACTIVO === "personal") {
+        msg = `Ahi tienes mi vida: ${valor} ${u1} = ${res} ${u2} ദ്ദി(˵ •̀ ᴗ - ˵ )`;
+      } else {
+        msg = `${valor} ${u1} = ${res} ${u2}`;
+      }
+
+      box.className = 'result-box success';
+      box.innerText = msg;
+      avatar.src = txt.img_exito;
+    }
+  </script>
+</body>
+</html>
