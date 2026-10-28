@@ -24,3 +24,22 @@
    ```bash
    git clone [https://github.com/tu-usuario/nombre-de-tu-repo.git](https://github.com/tu-usuario/nombre-de-tu-repo.git)
 2. Open index.html in any web browser.
+
+---
+
+## Español
+
+### Tecnologias
+* **HTML5**: Estructura semántica.
+* **CSS3**: Diseño y estilos visuales.
+* **JavaScript**: Lógica principal y manipulación del DOM.
+
+### Features
+* Cálculos en tiempo real sin recargar la página.
+* Arquitectura de archivo único para ejecución instantánea y sin configuración previa.
+
+### Primeros pasos
+1. Clona el repositorio:
+   ```bash
+   git clone [https://github.com/tu-usuario/nombre-de-tu-repo.git](https://github.com/tu-usuario/nombre-de-tu-repo.git)
+2. Abre index.html en cualquier web browser.
